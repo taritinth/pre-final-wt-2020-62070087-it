@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body class="bg-light">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif !important;
+        }
+    </style>
+    <div class="container">
+        <form class="mt-5" action="#">
+            <label for="search">ระบุคำค้นหา</label>
+            <div class="form-row">
+                <div class="col-9">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="search" placeholder="ฟังเพลงอะไรดีนะ...">
+                    </div>
+                </div>
+                <div class="col-3">
+                    <button class="btn btn-block btn-primary mb-2" onclick="searchSong()">ค้นหา</button>
+                </div>
+            </div>
+        </form>
+        <div id="found" class="h3 text-left"></div>
+        <div id="songList" class="row mt-4"></div>
+    </div>
+    <script>
+        let requestURL = 'https://api.jsonbin.io/b/5fb522bd5be6ec73e95005d3';
+
+        function showAllSong() {
+            $.getJSON(requestURL, function(data) {
+                // console.log(data.tracks.items);
+                let songs = data.tracks.items;
+                songs.forEach(item => {
+                    // console.log(item.album.artists[0].name);
+                    $('#songList').append(`<div class="col-4 mb-5">
+                <img src="${item.album.images[0].url}" class="w-100 rounded">
+                <h5 class="text-secondary mt-3">${item.album.name}</h5>
+                <div class="text-muted">Artist : ${item.album.artists[0].name}</div>
+                <div class="text-muted">Release date : ${item.album.release_date}</div>
+                <div class="text-muted">Available : ${item.album.available_markets.length}</div>
+            </div>`);
+                });
+            });
+        }
+
+        function searchSong() {
+            if ($('#search').val() != '') {
+                $('#songList').html('');
+                let searchField = $('#search').val();
+                let expression = new RegExp(searchField, "i");
+                let found = 0;
+                $.getJSON(requestURL, function(data) {
+                    let songs = data.tracks.items;
+                    songs.forEach(item => {
+                        if (item.album.name.search(expression) != -1 || item.album.artists[0].name.search(expression) != -1) {
+                            $("#songList").append(`<div class="col-4 mb-5">
+                            <img src="${item.album.images[0].url}" class="w-100 rounded">
+                            <h5 class="text-secondary mt-3">${item.album.name}</h5>
+                            <div class="text-muted">Artist : ${item.album.artists[0].name}</div>
+                            <div class="text-muted">Release date : ${item.album.release_date}</div>
+                            <div class="text-muted">Available : ${item.album.available_markets.length}</div>
+                        </div>`);
+                            found++;
+                        }
+                    });
+                    if (found > 0) {
+                        $('#found').html(`พบทั้งหมด ${found} รายการ`);
+                    } else {
+                        $('#found').html('');
+                        $('#songList').html('eiei 404');
+                    }
+                });
+            }
+        }
+        showAllSong();
+    </script>
+</body>
+
+</html>
